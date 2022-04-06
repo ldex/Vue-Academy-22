@@ -1,16 +1,31 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <product-list :products="products"></product-list>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import axios from 'axios'
+import ProductList from '@/components/ProductList.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
+    ProductList
+  },
+  data() {
+    return {
+      products: []
+    }
+  },
+  created () {
+    axios
+        .get('http://storerestservice.azurewebsites.net/api/products/')
+        .then(response => {
+          this.products = response.data
+        })
+        .catch(error => {
+          console.log('There was an error getting products from server: ', error.response)
+        });
+  },
 }
 </script>
 
@@ -19,8 +34,6 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>
