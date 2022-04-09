@@ -5,25 +5,62 @@
       <router-link to="/">Home</router-link>
       <router-link to="/products">Products</router-link>
       <router-link to="/about">About</router-link>
+      <router-link to="/admin">Admin</router-link>
+      <router-link v-if="!loggedIn" to="/login">Login</router-link>
+      <a v-else @click="logout">Logout</a>
     </nav>
-    <router-view v-slot="{ Component }">
-      <transition name="page" mode="out-in">
-        <component :is="Component" />
-      </transition>
+    <router-view v-slot="{ Component }" :key="$route.fullPath">
+      <template v-if="Component">
+        <transition name="page" mode="out-in">
+            <suspense>
+              <template #default>
+                <component :is="Component"></component>
+              </template>
+              <template #fallback>
+                <div style="margin-top:20px">
+                  <h2 class="loading">Loading</h2>
+                </div>
+              </template>
+            </suspense>
+        </transition>
+      </template>
     </router-view>
     <hr />
     <footer>Copyright Vue Academy 2022</footer>
   </div>
 </template>
 
-<style>/* Master Styles */
+<script>
+import { mapGetters, mapActions } from "vuex";
+
+export default {
+  computed: {
+    ...mapGetters(["loggedIn"]),
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("auth_token");
+      location.reload();
+    },
+    ...mapActions(["checkPreviousLogin"]),
+  },
+  created() {
+    this.checkPreviousLogin(); // check if there is an existing auth token when we enter the app
+  },
+};
+</script>
+
+
+<style>
+/* Master Styles */
 h1 {
   color: #42b983;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 250%;
   margin: 0px;
 }
-h2, h3 {
+h2,
+h3 {
   color: #435466;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
@@ -32,7 +69,9 @@ body {
   margin: 2em;
   margin-top: 0.5em;
 }
-body, input[text], button {
+body,
+input[text],
+button {
   color: #888;
   font-family: Cambria, Georgia;
 }
@@ -78,15 +117,16 @@ nav a {
   background-color: #eee;
   border-radius: 4px;
 }
-nav a:visited, a:link {
-  color: #607D8B;
+nav a:visited,
+a:link {
+  color: #607d8b;
 }
 nav a:hover {
   color: #039be5;
-  background-color: #CFD8DC;
+  background-color: #cfd8dc;
 }
 nav a.router-link-exact-active {
-  color: #FFF;
+  color: #fff;
   background-color: #42b983;
 }
 
@@ -101,19 +141,19 @@ nav a.router-link-exact-active {
   cursor: pointer;
   position: relative;
   left: 0;
-  background-color: #EEE;
-  margin: .5em;
-  padding: .3em 0;
+  background-color: #eee;
+  margin: 0.5em;
+  padding: 0.3em 0;
   height: 1.6em;
   border-radius: 4px;
 }
 .items li:hover {
-  color: #607D8B;
-  background-color: #DDD;
-  left: .1em;
+  color: #607d8b;
+  background-color: #ddd;
+  left: 0.1em;
 }
 .items li.selected:hover {
-  background-color: #BBD8DC;
+  background-color: #bbd8dc;
   color: white;
 }
 .items .text {
@@ -130,24 +170,24 @@ nav a.router-link-exact-active {
   cursor: pointer;
   position: relative;
   left: 0;
-  background-color: #EEE;
-  margin: .5em;
-  padding: .3em 0;
+  background-color: #eee;
+  margin: 0.5em;
+  padding: 0.3em 0;
   height: 1.6em;
   border-radius: 4px;
 }
 .items li:hover {
-  color: #607D8B;
-  background-color: #DDD;
-  left: .1em;
+  color: #607d8b;
+  background-color: #ddd;
+  left: 0.1em;
 }
 .items li.selected {
-  background-color: #CFD8DC;
+  background-color: #cfd8dc;
   color: white;
 }
 
 .items li.selected:hover {
-  background-color: #BBD8DC;
+  background-color: #bbd8dc;
 }
 .items .text {
   position: relative;
@@ -158,13 +198,13 @@ nav a.router-link-exact-active {
   font-size: small;
   color: white;
   padding: 0.8em 0.7em 0 0.7em;
-  background-color: #607D8B;
+  background-color: #607d8b;
   line-height: 1em;
   position: relative;
   left: -1px;
   top: -4px;
   height: 1.8em;
-  margin-right: .8em;
+  margin-right: 0.8em;
   border-radius: 4px 0 0 4px;
 }
 
@@ -183,47 +223,60 @@ nav a.router-link-exact-active {
 
 /* loading spinner */
 .loading {
-    display: inline-block;
-    overflow: hidden;
-    height: 1.3em;
-    margin-top: -0.3em;
-    line-height: 1.5em;
-    vertical-align: text-bottom;
+  display: inline-block;
+  overflow: hidden;
+  height: 1.3em;
+  margin-top: -0.3em;
+  line-height: 1.5em;
+  vertical-align: text-bottom;
+}
+
+.loading::after {
+  display: inline-table;
+  white-space: pre;
+  text-align: left;
+  content: "◎◎◎\A◉◎◎\A◎◉◎\A◎◎◉";
+  animation: spin 1s steps(4) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-6em);
   }
+}
 
-  .loading::after {
-    display: inline-table;
-    white-space: pre;
-    text-align: left;
-    content: "◎◎◎\A◉◎◎\A◎◉◎\A◎◎◉";
-    animation: spin 1s steps(4) infinite;
-  }
-
-  @keyframes spin  { to { transform: translateY( -6.0em); } }
-
-  /* transitions */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+/* transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
 
 @keyframes acrossIn {
-  0% { transform: translate3d(-100%, 0, 0); }
-  100% { transform: translate3d(0, 0, 0); }
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes acrossOut {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(100%, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
 }
 
 .page-enter-active {
-  animation: bounceIn .45s ease-out both;
+  animation: bounceIn 0.45s ease-out both;
 }
 
 .page-leave-active {
-  animation: flipOutX .65s ease-in both;
+  animation: flipOutX 0.65s ease-in both;
 }
 </style>

@@ -15,7 +15,7 @@ apiClient.interceptors.response.use(
     return response;
   },
   function (error) {
-    console.error("API Error, " + error);
+    console.error("Products API Error, " + error);
     return Promise.reject(error);
   }
 );
@@ -34,5 +34,15 @@ export default {
 
   getProduct(id) {
     return apiClient.get(`${RESOURCE_NAME}/${id}`);
+  },
+
+  insertProduct(product) {
+    this.clearCache = true;
+    return apiClient.post(RESOURCE_NAME, product)
+  },
+
+  deleteProduct(product) {
+    this.clearCache = true;
+    return apiClient.delete(`${RESOURCE_NAME}/${product.id}`)
   },
 };
